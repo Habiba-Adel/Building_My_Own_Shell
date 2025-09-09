@@ -1,0 +1,25 @@
+1- first thing the shell its commands is case sensitive and the syntax must be exactly 100 %
+2- now the shell itself is running process and there is 2 types of shell commands :
+--> the first one is the comaands that shell process implement it by itself in its code and it is commands related to change the state 
+of the shell like cd which is change your directory from the current one to another like that 
+PS C:\Users\Habiba> cd Desktop
+PS C:\Users\Habiba\Desktop> 
+so now the shell process its state or exactly its working directly is changed from one to another so this change the shell process itself so you 
+will need to write its code by yourself in your shell code 
+--> the second one is will not change the shell state like "ls" for example so the shell make new process ls and it pass it to os 
+to implement it and giving the result to shell again it is like delegation in OOP encapsulation and the shell process becomes the 
+parent process to the ls child process and this calles SPAWN PROCESS and we will not need to implement it in the shell itself code 
+
+-- the first one called BUILT IN COMMANDS  too and the second one its name is EXTERNAL COMMANDS
+
+--> now in current step we implement one of the simple built in command which is the "exit" and it is very simple code i wrote 
+in the shell code itself 
+--> now the current thing we need to make is the external commands and in this the shell must make 2 things the first one 
+is to make fork and in this step it make the new child process and then the second thing it is called the os to execute this process 
+and in the external command the os who which check about if this command is external or no if yes it will execite it if no it will 
+return error and our role is only to check about the error if we will pritn any thing to the user 
+
+--> there is procatr in os and it is role is to define the behaviour of the new child process will be created so we need to pass it
+when i start process to know the process defination and can create it correctly
+
+--> my current version is just single threaded and if you want to make it multi threaded you will need to use goroutines
