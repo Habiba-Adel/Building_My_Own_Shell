@@ -23,3 +23,43 @@ return error and our role is only to check about the error if we will pritn any 
 when i start process to know the process defination and can create it correctly
 
 --> my current version is just single threaded and if you want to make it multi threaded you will need to use goroutines
+
+--> now when creating your new process you will have 2 options in go the first one which is the low level way is related to the start process and 
+in this one you need to define the patha of this command to make the os can find it directly and if it is not there it will give you error and you will need to handle everything about it 
+which is hard and not portable so go coming with the exec.command one and it is the high level version of it it portable casue 
+it is go and find the path of the command by itself without entering you in details and which make the thing very easy to you 
+and that why i use it here in my code cause i had a lot of problems with the start process
+
+--> if there is any command you want to know its type use the command type "command name " and it will tell you the type of it 
+
+--> there is difference between the shell and bash the shell is jsut the general concept that we use it to can deal with the os 
+but the bash is special type of the shell and it having the main built it commands in shell too and more advanced features like scriptting and autocompletion 
+and history and most of linux systems they use the bash not the shell inside of them 
+
+--> now the second part before going into the advances part is the handling the environemt variables and it is variables that os define it for each process 
+and each process when start working it will have its own enviroment which it inherit it from its parent process and cause we implement the 
+shell from scratch so the first process which os our shell itself we donot handle any environment variables for it yet so if there is any child process come it will
+have any of them too so we will start handle them now we have 3 things :
+1-export --> and it is used to define and add new variable to can use it later
+2-echo --> and it is to give you the value of the variable name you entering
+3-unset --> and it is for deleting and removing defined variable 
+
+--> saving each shell session environement variables it is advanced feature in bashes and in advanced shells it will be future feature ان شاء الله 
+
+--> get env just take the key only without the $ so remeber to slice it before passing it to it to work correctly
+
+
+-----> this is an article about the GO environemnt variables if you want to know more about it :
+https://www.kelche.co/blog/go/golang-environment-variables/
+
+
+--> in pur step 6 we will start playing with the pipe and they are multiple commands the user enter then togather seperated by |
+and each pipe its input is its previous one if it is existed and ite output will be the input for its next pipe 
+
+--> so based on this 2 typed of the commands i will split the code into 2 functions one function handle the normal external / built in commands we play with it from the start
+and the second function will be play with the pipe commands which contains too from external / built in commands too but in chain 
+and in the main we will need to decide in which func we will call based on the entered line 
+and WHY? to make the code more organized and readable not spagatti code 
+
+--> you can imagne the flow of the pipe internally like that 
+cmd1: stdout → w1 → r1 → stdin cmd2 
