@@ -44,9 +44,10 @@ cd Building_My_Own_Shell
 go run main.go
 ```
 Now you will see a prompt like this :
+```bash
 🚀<Habiba_Shell>:/home/user $
-
-##🖥️ Usage
+```
+## 🖥️ Usage
 You can now type commands directly into your shell:
 ## Built-in commands:
 ```bash
@@ -62,6 +63,7 @@ ls                          # list files
 pwd                         # show current directory
 cat file.txt                # print file contents
 ```
+---
 
 💡 This project is being developed with dedication and curiosity — a valuable journey to explore system programming concepts, gain practical experience, and enjoy building something from scratch ❤️.
 
