@@ -7,16 +7,15 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-  
 )
 
-//i will seperate the handling the built in commands in alone function cause both can use it and rather of duplication i will do that
-//i pass the io.writer object to enable both functions call it without repeating 
-func HandlingBuiltInCommands (command string, here io.Writer) bool{
-  Args := strings.Split(command, " ")
+// i will seperate the handling the built in commands in alone function cause both can use it and rather of duplication i will do that
+// i pass the io.writer object to enable both functions call it without repeating
+func HandlingBuiltInCommands(command string, here io.Writer) bool {
+	Args := strings.Split(command, " ")
 
 	if Args[0] == "exit" {
-    os.Exit(0)
+		os.Exit(0)
 		return true
 	}
 
@@ -25,7 +24,7 @@ func HandlingBuiltInCommands (command string, here io.Writer) bool{
 		//there is a function in os that chaning the current directory
 		err := os.Chdir(Args[1])
 		if err != nil {
-			fmt.Fprintln(here,"This directory is not existed ^^ ")
+			fmt.Fprintln(here, "This directory is not existed ^^ ")
 		}
 		return true
 	}
@@ -40,7 +39,7 @@ func HandlingBuiltInCommands (command string, here io.Writer) bool{
 			all := os.Environ()
 			//there is a for each in go and that by using the range word
 			for _, item := range all {
-				fmt.Fprintln(here,item)
+				fmt.Fprintln(here, item)
 			}
 		} else {
 			//so that means the user enter name and value and we will need to split the second argument based on 0 and then send it to os to save it
@@ -64,10 +63,10 @@ func HandlingBuiltInCommands (command string, here io.Writer) bool{
 			return true
 		}
 		if Args[1][0] == '$' {
-			fmt.Fprintln(here,os.Getenv(Args[1][1:]))
+			fmt.Fprintln(here, os.Getenv(Args[1][1:]))
 		} else {
 			//we will just print the same key again
-			fmt.Fprintln(here,Args[1])
+			fmt.Fprintln(here, Args[1])
 		}
 		return true
 
@@ -75,48 +74,86 @@ func HandlingBuiltInCommands (command string, here io.Writer) bool{
 	//now the third thing is to implement the unset and it will delete the mentioned key from the variables
 	if Args[0] == "unset" { //its all cases in the reall shell it going us to the prompt again
 		os.Unsetenv(Args[1])
-		return true 
+		return true
 	}
-  //otherwise is there is no any valid condtion for it that means it is an external one so
-  return false
+	//otherwise is there is no any valid condtion for it that means it is an external one so
+	return false
 
 }
 
-
-
 // first the pipe commands handling function
 func HandlingPipe(line string) {
-	//now we have the whole entered line without any whote spcae
-	//now our first step is to splite it in array of strings based on |
-// 	commands := strings.Split(line, "|")
-// 	//and now each command from it will need to define its stdin and its std out and then split its command things to can pass it
-// //first thing we need to define the pbject that will store the inital dat to it 
-// previoushehe:=io.Reader(nil)
-//   //we have 3 special cases here the firs tone cause it will not having previous inptu and the last one cause it will write in the os and the normal cases 
-// 	for index, command := range commands {
+	commands := strings.Split(line, "|")
+	n := len(commands)
 
+	// previous pipe reader
+	var prevPipeReader *io.PipeReader = nil //it will be use as a pointer to the previous pipe to take the input from it
 
-// }
+	for i, cmdStr := range commands {
+		Args := strings.Fields(strings.TrimSpace(cmdStr))
+		if len(Args) == 0 {
+			continue
+		}
+
+		cmd := exec.Command(Args[0], Args[1:]...)
+
+		// If there is a previous pipe, use it as stdin
+		if prevPipeReader != nil {
+			cmd.Stdin = prevPipeReader
+		} else {
+			cmd.Stdin = os.Stdin
+		}
+
+		// If this is not the last command, create a pipe for stdout
+		if i != n-1 {
+			pr, pw := io.Pipe()
+			cmd.Stdout = pw
+			prevPipeReader = pr
+		} else {
+			// Last command: write to stdout directly
+			cmd.Stdout = os.Stdout
+		}
+
+		cmd.Stderr = os.Stderr
+
+		// Start the command
+		err := cmd.Start()
+		if err != nil {
+			fmt.Println("Error starting command:", err)
+			return
+		}
+
+		// this is for concurrency
+		if i != n-1 {
+			go func(c *exec.Cmd, pw *io.PipeWriter) {
+				c.Wait()
+				pw.Close()
+			}(cmd, cmd.Stdout.(*io.PipeWriter))
+		} else {
+			// Wait for the last command
+			cmd.Wait()
+		}
+	}
 }
 
 // second is the non pipe commands handling function
 func HandlingNonPipe(line string) {
-	//we will pass it first cause if is it built in so handle it and return 
-  //cause it here in the non pipe version our result must appear directly in the terminal so that why we pass the os
-  if HandlingBuiltInCommands(line,os.Stdout) == true {//that means it is a built in one so just return 
-   return 
-  }
+	//we will pass it first cause if is it built in so handle it and return
+	//cause it here in the non pipe version our result must appear directly in the terminal so that why we pass the os
+	if HandlingBuiltInCommands(line, os.Stdout) == true { //that means it is a built in one so just return
+		return
+	}
 
-	//using the exec is better very much rather than using the start process one 
-  //now the second option is that the command is external one
-  Args := strings.Split(line, " ")
+	//using the exec is better very much rather than using the start process one
+	//now the second option is that the command is external one
+	Args := strings.Split(line, " ")
 	cmd := exec.Command(Args[0], Args[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println("This command is not existed "+"😝 ")
+		fmt.Println("This command is not existed " + "😝 ")
 	}
 }
 
@@ -127,7 +164,7 @@ func main() {
 	for {
 		//this is called prompot of the shell  and with the current working directory
 		cwd, _ := os.Getwd()
-    fmt.Print("🚀\033[1;31m<Habiba_Shell>\033[0m:" + cwd + " \033[1;31m$\033[0m ")//fprint here used to print what you write but in another extra thing like a file or something
+		fmt.Print("🚀\033[1;31m<Habiba_Shell>\033[0m:" + cwd + " \033[1;31m$\033[0m ") //fprint here used to print what you write but in another extra thing like a file or something
 		line, _ := bufio.NewReader(os.Stdin).ReadString('\n')
 		line = strings.TrimSpace(line) //this is for removing the white spaces and inline characters from the command
 
@@ -142,3 +179,11 @@ func main() {
 	}
 
 }
+
+/*
+handling echo $? to get to you the status of the last running command if it is run without any errors so that means return 0 otherwise
+return any number
+
+2- handling grep command that it search about specific word in file
+
+*/

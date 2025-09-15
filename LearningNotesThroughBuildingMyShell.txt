@@ -63,3 +63,15 @@ and WHY? to make the code more organized and readable not spagatti code
 
 --> you can imagne the flow of the pipe internally like that 
 cmd1: stdout → w1 → r1 → stdin cmd2 
+
+
+--> first thing we need to understand the difference between the redirection and the pipe before starting implement the step number 6 
+Redirection (> or >>): always writes the command’s output to a file.
+> overwrites the file
+>> appends to the file
+< there is too to redirect the previous command result as an input for the comming command but it is not common on using the pipe used in the 
+redirection of the inputs  in the most of the time 
+Pipe (|): takes the command’s output and sends it as input to another command.
+No files involved unless you combine it with >
+
+
